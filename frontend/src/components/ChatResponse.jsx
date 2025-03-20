@@ -1,36 +1,39 @@
-import { useState } from 'react'
-import './App.css'
-import ChatInput from './components/ChatInput'
-import ChatResponse from './components/ChatResponse'
-import { fetchChatResponse } from './services/api';
-
-function App() {
-  const [response, setResponse] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  const handleQuestionSubmit = async (question) => {
-    setLoading(true);
-    setResponse(null);
-    try {
-      const apiResponse = await fetchChatResponse(question);
-      setResponse(apiResponse);
-    } catch (error) {
-      alert("Failed to get response")
-    } finally {
-      setLoading(false);
+const ChatResponse = ({ response }) => {
+    if (!response) {
+        return null;
     }
-  }
-  
-  return (
-    <div className='App'>
-      <header className='bg-primary text-white text-center py-4'>
-        <h1>Gemini ChatBot</h1>
-      </header>
-      <ChatInput onSubmit={handleQuestionSubmit}/>
-      {loading &&  <h3>Loading...</h3>}
-        <ChatResponse response={response} />
-    </div>
-  )
+
+    const {candidates, usageMetadata } = response;
+    
+    return (
+        <div className="container my-4">
+            <h3>Response</h3>
+        {candidates.map((candidate, index) => (
+            <div className="card mb-3" key={index}>
+            <div className="card-body">
+              <h5 className="card-title">Candidate {index + 1}</h5>
+              <p className="card-text">{candidate.content.parts[0].text}</p>
+              <h6>Citations:</h6>
+              <ul>
+                {candidate?.citationMetadata?.citationSources.map((source, idx) => (
+                    <li key={idx}>
+                        <a href={source.uri} target="_blank" rel="noopener noreferrer">
+                            {source.uri}
+                        </a> {" "}
+                        (Indexes: {source.startIndex} - {source.endIndex})
+                    </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ))}
+
+        <h4>Usage Metadata</h4>
+        <p>Prompt Tokens: {usageMetadata.promptTokenCount}</p>
+        <p>ProResponse Tokens: {usageMetadata.candidatesTokenCount}</p>
+        <p>Total Tokens: {usageMetadata.totalTokenCount}</p>
+        </div>
+    )
 }
 
-export default App
+export default ChatResponse;
