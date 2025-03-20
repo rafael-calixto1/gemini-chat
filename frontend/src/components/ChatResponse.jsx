@@ -20,7 +20,7 @@ function App() {
       setLoading(false);
     }
   }
-
+  
   return (
     <div className='App'>
       <header className='bg-primary text-white text-center py-4'>
