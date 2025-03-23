@@ -1,36 +1,37 @@
 import { useState } from 'react'
 import './App.css'
-import ChatInput from './components/ChatInput'
-import ImageChatInput from './components/ImageChatInput'
+import TextInput from './components/TextInput'
+import MediaInput from './components/MediaInput'
 import ChatResponse from './components/ChatResponse'
-import { fetchChatResponse, fetchImageChatResponse } from './services/api';
+import { chatService } from './services'
 
 
 function App() {
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [inputMode, setInputMode] = useState('text'); // 'text' or 'image'
+  const [inputMode, setInputMode] = useState('text'); // 'text' or 'media'
 
 
-  const handleQuestionSubmit = async (question) => {
+  const handleTextQuestion = async (question) => {
     setLoading(true);
     setResponse(null);
     try {
-      const apiResponse = await fetchChatResponse(question);
+      const apiResponse = await chatService.sendTextQuestion(question);
       setResponse(apiResponse);
     } catch (error) {
       alert("Failed to get response");
+      console.error(error);
     } finally {
       setLoading(false);
     }
   }
 
 
-  const handleImageQuestionSubmit = async (prompt, imageFile) => {
+  const handleMediaQuestion = async (prompt, mediaFile, mediaType) => {
     setLoading(true);
     setResponse(null);
     try {
-      const apiResponse = await fetchImageChatResponse(prompt, imageFile);
+      const apiResponse = await chatService.sendMediaQuestion(prompt, mediaFile, mediaType);
       setResponse(apiResponse);
     } catch (error) {
       alert("Failed to get response");
@@ -42,7 +43,7 @@ function App() {
 
 
   const toggleInputMode = () => {
-    setInputMode(inputMode === 'text' ? 'image' : 'text');
+    setInputMode(inputMode === 'text' ? 'media' : 'text');
   }
 
 
@@ -64,19 +65,19 @@ function App() {
             </button>
             <button
               type="button"
-              className={`btn ${inputMode === 'image' ? 'btn-primary' : 'btn-outline-primary'}`}
-              onClick={() => setInputMode('image')}
+              className={`btn ${inputMode === 'media' ? 'btn-primary' : 'btn-outline-primary'}`}
+              onClick={() => setInputMode('media')}
             >
-              Image + Text
+              Media + Text
             </button>
           </div>
         </div>
       </div>
      
       {inputMode === 'text' ? (
-        <ChatInput onSubmit={handleQuestionSubmit} />
+        <TextInput onSubmit={handleTextQuestion} />
       ) : (
-        <ImageChatInput onSubmit={handleImageQuestionSubmit} />
+        <MediaInput onSubmit={handleMediaQuestion} />
       )}
      
       {loading && <div className="text-center"><h3>Loading...</h3></div>}
